@@ -1,0 +1,67 @@
+name: ecommerce-prod
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: ecommerce-mongodb-prod
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017" # Bound to localhost only for security
+    volumes:
+      - mongo-prod-data:/data/db
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runner
+    container_name: ecommerce-backend-prod
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGO_URI=${MONGO_URI:-mongodb://mongodb:27017/ecommerce}
+      - JWT_SECRET=${JWT_SECRET:-prod_jwt_secret_key_change_me}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: ecommerce-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-/api}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+
+volumes:
+  mongo-prod-data:
+    driver: local
+
+networks:
+  ecommerce-network:
+    driver: bridge
