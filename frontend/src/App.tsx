@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import './index.css';
+import { HomePage } from './pages/HomePage';
+import { Activity, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface HealthResponse {
   status: string;
@@ -7,26 +8,39 @@ interface HealthResponse {
 }
 
 export function App() {
-  const [backendStatus, setBackendStatus] = useState<string>('Connecting to Express backend...');
+  const [backendStatus, setBackendStatus] = useState<'connecting' | 'online' | 'offline'>('connecting');
+  const [backendMessage, setBackendMessage] = useState<string>('Connecting to Express backend...');
 
   useEffect(() => {
     fetch('/api/health')
       .then((res) => res.json())
-      .then((data: HealthResponse) => setBackendStatus(data.message))
-      .catch(() => setBackendStatus('Backend server is not reachable yet. Start backend server using npm run dev in /backend'));
+      .then((data: HealthResponse) => {
+        setBackendStatus('online');
+        setBackendMessage(data.message || 'Express backend online');
+      })
+      .catch(() => {
+        setBackendStatus('offline');
+        setBackendMessage('Backend offline (Run npm run dev in /backend)');
+      });
   }, []);
 
-  
-
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>React + Express (TypeScript) Project</h1>
-      <p style={{ color: '#4caf50', fontSize: '1.2rem', fontWeight: 'bold' }}>
-        Frontend React (TS) is ready!
-      </p>
-      <div style={{ marginTop: '1rem', padding: '1rem', border: '1px solid #444', borderRadius: '8px' }}>
-        <h3>Backend Status:</h3>
-        <p>{backendStatus}</p>
+    <div className="relative">
+      {/* Render Main E-Commerce Homepage */}
+      <HomePage />
+
+      {/* Floating Subtle Backend Health Status Badge */}
+      <div className="fixed bottom-4 left-4 z-40 hidden sm:flex items-center gap-2 glass-panel border border-slate-800 px-3.5 py-2 rounded-full shadow-2xl text-xs">
+        {backendStatus === 'connecting' && (
+          <Activity className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+        )}
+        {backendStatus === 'online' && (
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+        )}
+        {backendStatus === 'offline' && (
+          <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+        )}
+        <span className="text-slate-300 font-semibold">{backendMessage}</span>
       </div>
     </div>
   );
