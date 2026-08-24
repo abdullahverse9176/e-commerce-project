@@ -16,6 +16,8 @@ export function App() {
       .catch(() => setBackendStatus('Backend server is not reachable yet. Start backend server using npm run dev in /backend'));
   }, []);
 
+  
+
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>React + Express (TypeScript) Project</h1>
