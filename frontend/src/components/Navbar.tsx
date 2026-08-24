@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   ShoppingBag, 
   Heart, 
-  Search, 
   User, 
   Menu, 
   X, 
@@ -29,24 +28,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   cartCount,
   wishlistCount,
   onOpenCart,
-  searchQuery,
-  setSearchQuery,
   selectedCategory,
   setSelectedCategory,
-  categories,
-  allProducts,
-  onSelectProduct,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-
-  const searchResults = searchQuery.trim()
-    ? allProducts.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.category.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 5)
-    : [];
 
   return (
     <header className="sticky top-0 z-40 w-full">
@@ -73,8 +58,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20 gap-4">
 
-            {/* Brand Logo */}
-            <div className="flex items-center gap-8">
+            {/* Brand Logo & Clean Tabs */}
+            <div className="flex items-center gap-10">
               <a href="#" className="flex items-center gap-2 group">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg glow-indigo group-hover:scale-105 transition-transform">
                   <Sparkles className="w-5 h-5 animate-pulse" />
@@ -89,8 +74,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               </a>
 
-              {/* Desktop Nav Links */}
-              <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
+              {/* Simplified Desktop Nav Links (3 main tabs) */}
+              <div className="hidden md:flex items-center gap-6 text-sm font-medium">
                 <button
                   onClick={() => setSelectedCategory('all')}
                   className={`transition-colors py-2 border-b-2 ${
@@ -101,59 +86,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   All Products
                 </button>
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`transition-colors py-2 border-b-2 ${
-                      selectedCategory === cat.id
-                        ? 'text-indigo-400 border-indigo-500 font-semibold'
-                        : 'text-slate-300 border-transparent hover:text-white'
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+                <button
+                  onClick={() => setSelectedCategory('electronics')}
+                  className={`transition-colors py-2 border-b-2 ${
+                    selectedCategory === 'electronics'
+                      ? 'text-indigo-400 border-indigo-500 font-semibold'
+                      : 'text-slate-300 border-transparent hover:text-white'
+                  }`}
+                >
+                  Tech & Gadgets
+                </button>
+                <button
+                  onClick={() => setSelectedCategory('fashion')}
+                  className={`transition-colors py-2 border-b-2 ${
+                    selectedCategory === 'fashion'
+                      ? 'text-indigo-400 border-indigo-500 font-semibold'
+                      : 'text-slate-300 border-transparent hover:text-white'
+                  }`}
+                >
+                  Fashion
+                </button>
               </div>
-            </div>
-
-            {/* Search Bar */}
-            <div className="hidden md:flex flex-1 max-w-md relative">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  placeholder="Search products, brands, tech..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                  className="w-full bg-slate-900/90 text-slate-100 placeholder-slate-500 text-sm rounded-xl pl-10 pr-4 py-2.5 border border-slate-700/60 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
-                />
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-              </div>
-
-              {/* Real-time Search Dropdown */}
-              {isSearchFocused && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden z-50 divide-y divide-slate-800">
-                  {searchResults.map((product) => (
-                    <div
-                      key={product.id}
-                      onClick={() => onSelectProduct(product)}
-                      className="p-3 flex items-center gap-3 hover:bg-slate-800/80 cursor-pointer transition-colors"
-                    >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-10 h-10 object-cover rounded-lg bg-slate-800"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-200 truncate">{product.name}</p>
-                        <p className="text-xs text-indigo-400 font-semibold">${product.price.toFixed(2)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Right Action Icons */}
@@ -194,7 +147,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2.5 text-slate-300 hover:text-white rounded-xl lg:hidden"
+                className="p-2.5 text-slate-300 hover:text-white rounded-xl md:hidden"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -204,45 +157,40 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-slate-950/95 border-t border-slate-800 p-4 space-y-4">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-900 text-slate-100 placeholder-slate-500 text-sm rounded-xl pl-10 pr-4 py-2.5 border border-slate-800"
-              />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-            </div>
-
-            <div className="flex flex-col gap-2 pt-2">
-              <button
-                onClick={() => {
-                  setSelectedCategory('all');
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`text-left px-3 py-2 rounded-lg text-sm font-medium ${
-                  selectedCategory === 'all' ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300'
-                }`}
-              >
-                All Products
-              </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedCategory(cat.id);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left px-3 py-2 rounded-lg text-sm font-medium ${
-                    selectedCategory === cat.id ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300'
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
+          <div className="md:hidden bg-slate-950/95 border-t border-slate-800 p-4 space-y-2">
+            <button
+              onClick={() => {
+                setSelectedCategory('all');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+                selectedCategory === 'all' ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300'
+              }`}
+            >
+              All Products
+            </button>
+            <button
+              onClick={() => {
+                setSelectedCategory('electronics');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+                selectedCategory === 'electronics' ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300'
+              }`}
+            >
+              Tech & Gadgets
+            </button>
+            <button
+              onClick={() => {
+                setSelectedCategory('fashion');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+                selectedCategory === 'fashion' ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300'
+              }`}
+            >
+              Fashion
+            </button>
           </div>
         )}
       </nav>
