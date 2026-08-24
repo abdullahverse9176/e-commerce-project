@@ -19,6 +19,7 @@ services:
       start_period: 10s
 
   backend:
+    image: ${DOCKERHUB_USERNAME}/ecommerce-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -42,6 +43,7 @@ services:
       - ecommerce-network
 
   frontend:
+    image: ${DOCKERHUB_USERNAME}/ecommerce-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
