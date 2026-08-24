@@ -34,7 +34,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: ecommerce-frontend-dev
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:80"
     volumes:
       - ./frontend/src:/app/src
     environment:
