@@ -94,7 +94,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       : 'text-slate-300 border-transparent hover:text-white'
                   }`}
                 >
-                  Tech & Gadgets
+                  Tech & Gadgets 12
                 </button>
                 <button
                   onClick={() => setSelectedCategory('fashion')}
