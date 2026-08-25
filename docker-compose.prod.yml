@@ -7,8 +7,6 @@ services:
     container_name: ecommerce-mongodb-prod
     restart: unless-stopped
 
-    # MongoDB is only accessible from the EC2 host,
-    # not publicly from the internet.
     ports:
       - "127.0.0.1:27017:27017"
 
@@ -28,18 +26,11 @@ services:
 
   backend:
     image: ${DOCKERHUB_USERNAME}/ecommerce-backend:latest
-
     container_name: ecommerce-backend-prod
     restart: unless-stopped
 
-    # Backend is NOT exposed directly to the internet.
-    # Nginx/frontend communicates with it through Docker network.
-    expose:
-      - "5000"
-
-    env_file:
-      - path: ./backend/.env
-        required: false
+    ports:
+      - "127.0.0.1:5000:5000"
 
     environment:
       PORT: 5000
@@ -72,12 +63,11 @@ services:
 
   frontend:
     image: ${DOCKERHUB_USERNAME}/ecommerce-frontend:latest
-
     container_name: ecommerce-frontend-prod
     restart: unless-stopped
 
     ports:
-      - "80:80"
+      - "127.0.0.1:8080:80"
 
     depends_on:
       backend:
