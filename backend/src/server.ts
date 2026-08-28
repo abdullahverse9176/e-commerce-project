@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB, getDBStatus } from './config/db';
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
 
@@ -14,6 +15,9 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// Auth Routes
+app.use('/api/auth', authRoutes);
+
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({
     status: 'ok',
@@ -25,4 +29,3 @@ app.get('/api/health', (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
 });
-
