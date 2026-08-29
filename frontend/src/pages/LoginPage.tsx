@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Loader2, Sparkles, ShieldCheck, ShoppingBag, Truck } from 'lucide-react';
 import { loginApi } from '../services/api';
+import { loginSchema, LoginFormData } from '../schemas/authSchema';
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,20 +17,33 @@ export const LoginPage: React.FC = () => {
   // Redirect destination (if user came from a protected route or default to '/')
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  // React Hook Form initialization with Zod resolver
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      rememberMe: false,
+    },
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    setServerError(null);
     setLoading(true);
 
     try {
-      const data = await loginApi(email, password);
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+      const response = await loginApi(data.email, data.password);
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
       }
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      setServerError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -42,7 +56,7 @@ export const LoginPage: React.FC = () => {
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
-        
+
         {/* Left Side: Brand Highlights */}
         <div className="lg:col-span-5 text-left space-y-6 hidden lg:block pr-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
@@ -85,7 +99,7 @@ export const LoginPage: React.FC = () => {
         {/* Right Side: Dedicated Login Form Card */}
         <div className="lg:col-span-7">
           <div className="glass-panel bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-            
+
             {/* Top Header */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-white tracking-tight">Sign In</h2>
@@ -94,19 +108,19 @@ export const LoginPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Error Message */}
-            {error && (
+            {/* Server Error Message */}
+            {serverError && (
               <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-3 text-rose-400 text-xs animate-shake">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <span className="font-semibold block">Authentication Error</span>
-                  <span>{error}</span>
+                  <span>{serverError}</span>
                 </div>
               </div>
             )}
 
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Login Form using React Hook Form & Zod */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
                   Email Address
@@ -115,13 +129,20 @@ export const LoginPage: React.FC = () => {
                   <Mail className="w-4 h-4 absolute left-4 top-3.5 text-slate-400" />
                   <input
                     type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register('email')}
                     placeholder="name@example.com"
-                    className="w-full bg-slate-950/90 border border-slate-800 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                    className={`w-full bg-slate-950/90 border rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 transition-all ${errors.email
+                      ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/50'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/50'
+                      }`}
                   />
                 </div>
+                {errors.email && (
+                  <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    <span>{errors.email.message}</span>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -137,11 +158,12 @@ export const LoginPage: React.FC = () => {
                   <Lock className="w-4 h-4 absolute left-4 top-3.5 text-slate-400" />
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register('password')}
                     placeholder="••••••••"
-                    className="w-full bg-slate-950/90 border border-slate-800 focus:border-indigo-500 rounded-xl pl-11 pr-11 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                    className={`w-full bg-slate-950/90 border rounded-xl pl-11 pr-11 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 transition-all ${errors.password
+                      ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/50'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/50'
+                      }`}
                   />
                   <button
                     type="button"
@@ -151,12 +173,19 @@ export const LoginPage: React.FC = () => {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    <span>{errors.password.message}</span>
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-between text-xs py-1">
                 <label className="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-slate-300">
                   <input
                     type="checkbox"
+                    {...register('rememberMe')}
                     className="rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-indigo-500/20"
                   />
                   <span>Remember me on this device</span>
