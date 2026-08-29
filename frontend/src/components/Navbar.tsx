@@ -8,12 +8,9 @@ import {
   Sparkles, 
   Percent,
   Truck,
-  LogIn,
-  LogOut,
-  Shield
+  LogIn
 } from 'lucide-react';
 import { Product } from '../types/ecommerce';
-import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   cartCount: number;
@@ -37,7 +34,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   setSelectedCategory,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 w-full">
@@ -117,39 +113,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Right Action Icons */}
             <div className="flex items-center gap-3">
-              {/* Login / User Profile Button */}
-              {isAuthenticated && user ? (
-                <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-800 rounded-xl p-1.5 pl-3">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm">
-                    {user.name.charAt(0)}
-                  </div>
-                  <div className="hidden sm:flex flex-col text-left pr-1">
-                    <span className="text-xs font-semibold text-slate-200 truncate max-w-[100px]">
-                      {user.name}
-                    </span>
-                    {isAdmin && (
-                      <span className="text-[9px] text-purple-400 font-bold flex items-center gap-0.5 -mt-0.5">
-                        <Shield className="w-2.5 h-2.5" /> Admin
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={logout}
-                    title="Logout"
-                    className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <Link
-                  to="/login"
-                  className="flex items-center gap-2 bg-slate-900/90 border border-indigo-500/30 hover:border-indigo-500/70 text-indigo-300 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md transition-all hover:scale-105"
-                >
-                  <LogIn className="w-4 h-4 text-indigo-400" />
-                  <span>Login</span>
-                </Link>
-              )}
+              {/* Login Button */}
+              <Link
+                to="/login"
+                className="flex items-center gap-2 bg-slate-900/90 border border-indigo-500/30 hover:border-indigo-500/70 text-indigo-300 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md transition-all hover:scale-105"
+              >
+                <LogIn className="w-4 h-4 text-indigo-400" />
+                <span>Login</span>
+              </Link>
 
               {/* Wishlist Button */}
               <button 
