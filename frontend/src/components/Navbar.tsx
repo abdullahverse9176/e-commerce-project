@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   ShoppingBag, 
   Heart, 
@@ -18,7 +19,7 @@ interface NavbarProps {
   cartCount: number;
   wishlistCount: number;
   onOpenCart: () => void;
-  onOpenAuth: () => void;
+  onOpenAuth?: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedCategory: string;
@@ -32,7 +33,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   cartCount,
   wishlistCount,
   onOpenCart,
-  onOpenAuth,
   selectedCategory,
   setSelectedCategory,
 }) => {
@@ -66,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Brand Logo & Clean Tabs */}
             <div className="flex items-center gap-10">
-              <a href="#" className="flex items-center gap-2 group">
+              <Link to="/" className="flex items-center gap-2 group">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg glow-indigo group-hover:scale-105 transition-transform">
                   <Sparkles className="w-5 h-5 animate-pulse" />
                 </div>
@@ -78,7 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     Premium Store
                   </span>
                 </div>
-              </a>
+              </Link>
 
               {/* Simplified Desktop Nav Links */}
               <div className="hidden md:flex items-center gap-6 text-sm font-medium">
@@ -142,13 +142,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={onOpenAuth}
+                <Link
+                  to="/login"
                   className="flex items-center gap-2 bg-slate-900/90 border border-indigo-500/30 hover:border-indigo-500/70 text-indigo-300 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md transition-all hover:scale-105"
                 >
                   <LogIn className="w-4 h-4 text-indigo-400" />
                   <span>Login</span>
-                </button>
+                </Link>
               )}
 
               {/* Wishlist Button */}

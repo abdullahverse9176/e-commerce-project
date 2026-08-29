@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { AuthModal } from './AuthModal';
 import { MOCK_CATEGORIES, MOCK_PRODUCTS } from '../data/mockData';
 
 export const Layout: React.FC = () => {
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -17,7 +15,6 @@ export const Layout: React.FC = () => {
         cartCount={0}
         wishlistCount={0}
         onOpenCart={() => { }}
-        onOpenAuth={() => setIsAuthOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         selectedCategory={selectedCategory}
@@ -34,12 +31,6 @@ export const Layout: React.FC = () => {
 
       {/* Shared Footer */}
       <Footer />
-
-      {/* Login / Register Modal */}
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-      />
     </div>
   );
 };

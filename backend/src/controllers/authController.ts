@@ -74,17 +74,19 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const cleanEmail = email.toLowerCase().trim();
+
     // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
-      res.status(400).json({ message: 'Invalid credentials' });
+      res.status(400).json({ message: 'Invalid email or password' });
       return;
     }
 
     // Check password match
     const isMatch = await comparePassword(password, user.password || '');
     if (!isMatch) {
-      res.status(400).json({ message: 'Invalid credentials' });
+      res.status(400).json({ message: 'Invalid email or password' });
       return;
     }
 

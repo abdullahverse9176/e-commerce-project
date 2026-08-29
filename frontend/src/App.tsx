@@ -5,6 +5,8 @@ import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { Activity, CheckCircle2, AlertCircle } from 'lucide-react';
 
+import { LoginPage } from './pages/LoginPage';
+
 interface HealthResponse {
   status: string;
   message: string;
@@ -35,7 +37,7 @@ export function App() {
             {/* Shared Layout wrapper containing Navbar (Header) & Footer */}
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
-              {/* Additional routes added here will automatically share Header & Footer */}
+              <Route path="login" element={<LoginPage />} />
             </Route>
           </Routes>
 
