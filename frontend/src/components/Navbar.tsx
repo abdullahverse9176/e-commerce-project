@@ -10,20 +10,13 @@ import {
   Truck,
   LogIn
 } from 'lucide-react';
-import { Product } from '../types/ecommerce';
 
 interface NavbarProps {
   cartCount: number;
   wishlistCount: number;
   onOpenCart: () => void;
-  onOpenAuth?: () => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
-  categories: { id: string; name: string }[];
-  allProducts: Product[];
-  onSelectProduct: (product: Product) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
