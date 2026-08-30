@@ -8,7 +8,8 @@ import {
   Sparkles, 
   Percent,
   Truck,
-  LogIn
+  LogIn,
+  LayoutDashboard
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -106,6 +107,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Right Action Icons */}
             <div className="flex items-center gap-3">
+              {/* Dashboard Link */}
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-2 bg-indigo-600/20 border border-indigo-500/40 hover:bg-indigo-600/40 text-indigo-300 hover:text-white px-3.5 py-2 rounded-xl text-sm font-semibold shadow-md transition-all hover:scale-105"
+              >
+                <LayoutDashboard className="w-4 h-4 text-indigo-400" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+
               {/* Login Button */}
               <Link
                 to="/login"
