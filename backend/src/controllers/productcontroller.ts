@@ -62,14 +62,21 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const updateData: Record<string, any> = { ...req.body };
-    if (req.file) {
-      updateData.imageUrl = req.file.path;
-    }
-    if (updateData.price !== undefined) updateData.price = Number(updateData.price);
-    if (updateData.stock !== undefined) updateData.stock = Number(updateData.stock);
 
-    const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const { name, description, category } = req.body;
+    const imgUrl = req.file ? req.file.path : req.body.imgUrl;
+
+    const price = Number(req.body.price);
+    const stock = Number(req.body.stock);
+
+    const updateData = {
+      name, price, description, category, stock, imgUrl
+    } 
+
+    const id = req.params.id;
+
+    const product = await Product.findByIdAndUpdate(id, updateData, { new: true });
+
     if (!product) {
       res.status(404).json({ success: false, message: 'Product not found' });
       return;
