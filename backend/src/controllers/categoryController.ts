@@ -20,11 +20,27 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 };
 
 export const getCategories = async (req: Request, res: Response): Promise<void> => {
- 
+ try {
+    const categories = await Category.find({}).sort({createdAt:-1});
+    
+    res.status(200).json({ success: true, data: categories });
+
+ } catch (error) {
+  res.status(500).json({ success: false, message: (error as Error).message });
+ }
 };
 
 export const getSingleCategory = async (req: Request, res: Response): Promise<void> => {
- 
+  try {
+    const id = req.params.id;
+    const category = await Category.findById(id);
+    if(!category){
+      res.status(404).json({success:false,message:'Category not found'});
+    }
+    res.status(200).json({success:true,data:category});
+  } catch (error) {
+    
+  }
 };
 
 export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
