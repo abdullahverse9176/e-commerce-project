@@ -44,9 +44,28 @@ export const getSingleCategory = async (req: Request, res: Response): Promise<vo
 };
 
 export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
- 
+  try{
+    const id = req.params.id; 
+    const category = await Category.findByIdAndDelete(id);
+    if(!category){
+      res.status(404).json({success:false,message:'Category not found'});
+    }
+    res.status(200).json({success:true,data:category});
+  }catch(error){
+    res.status(500).json({success:false,message:(error as Error).message});
+  }
 };
 
 export const updateCategory = async (req: Request, res: Response): Promise<void> => {
- 
+  try{  
+    const id = req.params.id;  
+    const {name} = req.body;
+    const category = await Category.findByIdAndUpdate(id,{name:name,slug:slugify(name,{lower:true,trim:true})});
+    if(!category){
+      res.status(404).json({success:false,message:'Category not found'});
+    }
+    res.status(200).json({success:true,data:category});
+  }catch(error){
+    res.status(500).json({success:false,message:(error as Error).message});
+  }
 };
