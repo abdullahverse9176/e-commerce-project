@@ -1,9 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Package,
+  FolderTree,
   PlusCircle,
+  FolderPlus,
   Store,
   Sparkles,
   ChevronRight,
@@ -11,34 +13,42 @@ import {
 } from 'lucide-react';
 
 interface SidebarProps {
-  activeTab: 'overview' | 'products' | 'add_product';
-  setActiveTab: (tab: 'overview' | 'products' | 'add_product') => void;
-  openCreateModal: () => void;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
-  totalProductsCount: number;
+  totalProductsCount?: number;
+  totalCategoriesCount?: number;
 }
 
 export const DashboardSidebar: React.FC<SidebarProps> = ({
-  activeTab,
-  setActiveTab,
-  openCreateModal,
   mobileOpen,
   setMobileOpen,
-  totalProductsCount,
+  totalProductsCount = 0,
+  totalCategoriesCount = 0,
 }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   const navItems = [
     {
-      id: 'overview',
+      to: '/dashboard',
       label: 'Dashboard Overview',
       icon: LayoutDashboard,
       badge: null,
+      isActive: currentPath === '/dashboard',
     },
     {
-      id: 'products',
+      to: '/dashboard/products',
       label: 'Product Catalog',
       icon: Package,
       badge: totalProductsCount,
+      isActive: currentPath.startsWith('/dashboard/products') || currentPath === '/dashboard/create-product' || currentPath.startsWith('/dashboard/edit-product'),
+    },
+    {
+      to: '/dashboard/categories',
+      label: 'Categories',
+      icon: FolderTree,
+      badge: totalCategoriesCount,
+      isActive: currentPath.startsWith('/dashboard/categories') || currentPath === '/dashboard/create-category' || currentPath.startsWith('/dashboard/edit-category'),
     },
   ];
 
@@ -46,7 +56,12 @@ export const DashboardSidebar: React.FC<SidebarProps> = ({
     <div className="flex flex-col h-full bg-slate-900 border-r border-slate-800 text-slate-200">
       {/* Brand & Sidebar Header */}
       <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 group">
+        <Link
+          to="/"
+          aria-label="Return to store homepage"
+          title="Return to AuraMart Storefront"
+          className="flex items-center gap-3 group"
+        >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white shadow-lg glow-indigo group-hover:scale-105 transition-transform">
             <Sparkles className="w-5 h-5 animate-pulse" />
           </div>
@@ -61,44 +76,57 @@ export const DashboardSidebar: React.FC<SidebarProps> = ({
         </Link>
 
         <button
+          type="button"
           onClick={() => setMobileOpen(false)}
+          aria-label="Close sidebar navigation menu"
           className="md:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Main Action Button */}
-      <div className="p-4">
-        <button
-          onClick={() => {
-            openCreateModal();
-            setMobileOpen(false);
-          }}
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white py-3 px-4 rounded-xl font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+      {/* Quick Action Buttons */}
+      <div className="p-4 space-y-2">
+        <Link
+          to="/dashboard/create-product"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Navigate to create product page"
+          title="Create New Product"
+          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white py-2.5 px-4 rounded-xl font-semibold text-xs shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
-          <PlusCircle className="w-5 h-5" />
+          <PlusCircle className="w-4 h-4" />
           <span>Add New Product</span>
-        </button>
+        </Link>
+
+        <Link
+          to="/dashboard/create-category"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Navigate to create category page"
+          title="Create New Category"
+          className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-750 text-indigo-300 hover:text-white border border-indigo-500/20 py-2.5 px-4 rounded-xl font-semibold text-xs transition-all hover:border-indigo-500/40 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <FolderPlus className="w-4 h-4 text-indigo-400" />
+          <span>Add New Category</span>
+        </Link>
       </div>
 
       {/* Navigation Links */}
-      <div className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
+      <nav aria-label="Dashboard navigation" className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto">
         <p className="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
           Navigation
         </p>
 
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const isActive = item.isActive;
 
           return (
-            <button
-              key={item.id}
-              onClick={() => {
-                setActiveTab(item.id as 'overview' | 'products');
-                setMobileOpen(false);
-              }}
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={() => setMobileOpen(false)}
+              aria-label={`Navigate to ${item.label}`}
+              title={item.label}
               className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-medium text-sm transition-all ${
                 isActive
                   ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 shadow-md font-semibold'
@@ -110,7 +138,7 @@ export const DashboardSidebar: React.FC<SidebarProps> = ({
                 <span>{item.label}</span>
               </div>
 
-              {item.badge !== null && (
+              {item.badge !== null && item.badge !== undefined && (
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                     isActive
@@ -121,7 +149,7 @@ export const DashboardSidebar: React.FC<SidebarProps> = ({
                   {item.badge}
                 </span>
               )}
-            </button>
+            </Link>
           );
         })}
 
@@ -131,6 +159,8 @@ export const DashboardSidebar: React.FC<SidebarProps> = ({
           </p>
           <Link
             to="/"
+            aria-label="Navigate back to store"
+            title="Back to Customer Storefront"
             className="w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all"
           >
             <div className="flex items-center gap-3">
@@ -140,7 +170,7 @@ export const DashboardSidebar: React.FC<SidebarProps> = ({
             <ChevronRight className="w-4 h-4 text-slate-500" />
           </Link>
         </div>
-      </div>
+      </nav>
 
       {/* User / Footer */}
       <div className="p-4 border-t border-slate-800 bg-slate-950/40">
