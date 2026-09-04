@@ -15,6 +15,7 @@ interface DashboardOverviewProps {
   products: BackendProduct[];
   onOpenCreate: () => void;
   onNavigateProducts: () => void;
+  onNavigateCategories?: () => void;
   onRefresh: () => void;
 }
 
@@ -22,6 +23,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   products,
   onOpenCreate,
   onNavigateProducts,
+  onNavigateCategories,
   onRefresh,
 }) => {
   const totalProducts = products.length;
@@ -128,12 +130,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
 
         {/* Card 4: Total Categories */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-slate-700 transition-colors">
+        <div
+          onClick={onNavigateCategories}
+          className={`bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden group transition-all ${
+            onNavigateCategories ? 'cursor-pointer hover:border-purple-500/50 hover:bg-slate-800/60' : 'hover:border-slate-700'
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 group-hover:text-purple-300 transition-colors">
               Categories
             </span>
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
               <Layers className="w-5 h-5" />
             </div>
           </div>
