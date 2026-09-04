@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
+import { SignUp } from './pages/SignUp';
 import { CategoryProvider } from './context/CategoryContext';
 import { DashboardLayout } from './pages/dashboard/DashboardLayout';
 import { DashboardOverviewPage } from './pages/dashboard/DashboardOverviewPage';
@@ -21,6 +22,7 @@ export function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
               <Route path="login" element={<LoginPage />} />
+              <Route path="signup" element={<SignUp />} />
             </Route>
 
             {/* Dashboard Sub-routes */}
