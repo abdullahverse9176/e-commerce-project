@@ -36,17 +36,9 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       role: role || 'user',
     });
 
-    // Generate JWT Token
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
     // Response (excluding password)
     res.status(201).json({
       message: 'User registered successfully',
-      token,
       user: {
         _id: user._id,
         name: user.name,
@@ -61,9 +53,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-// @desc    Login user & get token
-// @route   POST /api/auth/login
-// @access  Public
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
