@@ -1,8 +1,18 @@
 import React from 'react';
 import { Mail, Lock, User, ArrowRight, Sparkles, ShieldCheck, ShoppingBag, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 
 export const SignUp = () => {
+
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  const handleFormSubmittion = (data) => {
+    console.log('data'); // Handle form submission logic here
+  };
+
+
+
   return (
     <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-slate-950">
       {/* Background Decorative Glows */}
@@ -10,7 +20,7 @@ export const SignUp = () => {
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
-        
+
         {/* Left Side: Brand Highlights */}
         <div className="lg:col-span-5 text-left space-y-6 hidden lg:block pr-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
@@ -57,7 +67,7 @@ export const SignUp = () => {
         {/* Right Side: Sign Up Form Card */}
         <div className="lg:col-span-7">
           <div className="glass-panel bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-            
+
             {/* Header */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-white tracking-tight">Create Account</h2>
@@ -70,7 +80,7 @@ export const SignUp = () => {
             </div>
 
             {/* Form */}
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit(handleFormSubmittion)}>
               {/* Full Name */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-2">Full Name</label>
@@ -80,6 +90,7 @@ export const SignUp = () => {
                     type="text"
                     placeholder="John Doe"
                     className="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:border-indigo-500 focus:ring-indigo-500/50 transition-all"
+                    {...register("name", { required: "Full name is required" })}
                   />
                 </div>
               </div>
@@ -93,6 +104,7 @@ export const SignUp = () => {
                     type="email"
                     placeholder="name@example.com"
                     className="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:border-indigo-500 focus:ring-indigo-500/50 transition-all"
+                    {...register("email", { required: "Email is required" })}
                   />
                 </div>
               </div>
@@ -106,6 +118,7 @@ export const SignUp = () => {
                     type="password"
                     placeholder="••••••••"
                     className="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:border-indigo-500 focus:ring-indigo-500/50 transition-all"
+                    {...register("password", {required: "Password is required"})}
                   />
                 </div>
               </div>
