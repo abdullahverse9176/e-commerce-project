@@ -15,3 +15,14 @@ export interface AuthResponse {
 export interface AuthError {
   message: string;
 }
+
+export interface LoginInterfce {
+  email: string,
+  password: string
+}
+
+export interface SignUpInterfce {
+  name: string,
+  email: string,
+  password: string
+}
