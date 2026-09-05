@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { registerUser, loginUser } from '../controllers/authController';
+import { rateLimiter } from '../helpers/authHelper';
 
 const router = Router();
 
@@ -7,6 +8,6 @@ const router = Router();
 router.post('/register', registerUser);
 
 // POST /api/auth/login
-router.post('/login', loginUser);
+router.post('/login', rateLimiter(), loginUser);
 
 export default router;
