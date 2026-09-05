@@ -1,4 +1,5 @@
 import { AuthResponse } from '../types/auth';
+import { useMutation } from '@tanstack/react-query';
 
 const API_BASE = '/api';
 
@@ -43,3 +44,15 @@ export const fetchProductsApi = async () => {
   }
   return data;
 };
+
+export const useLoginMutation = () =>
+  useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      loginApi(email, password),
+  });
+
+export const useRegisterMutation = () =>
+  useMutation({
+    mutationFn: ({ name, email, password }: { name: string; email: string; password: string }) =>
+      registerApi(name, email, password),
+  });
