@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
-import { SignUp } from './pages/SignUp';
 import { CategoryProvider } from './context/CategoryContext';
 import { DashboardLayout } from './pages/dashboard/DashboardLayout';
 import { DashboardOverviewPage } from './pages/dashboard/DashboardOverviewPage';
@@ -11,6 +10,7 @@ import { CreateProductPage } from './pages/dashboard/CreateProductPage';
 import { CategoriesListPage } from './pages/dashboard/CategoriesListPage';
 import { CreateCategoryPage } from './pages/dashboard/CreateCategoryPage';
 import { EditCategoryPage } from './pages/dashboard/EditCategoryPage';
+import { SignUp } from './pages/SignUp';
 
 export function App() {
   return (

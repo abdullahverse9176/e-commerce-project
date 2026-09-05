@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { email, z } from 'zod';
 
 export const loginSchema = z.object({
   email: z
@@ -12,4 +12,11 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
+export const SignUpSchema = z.object({
+  name: z.string().min(6, 'Name is required'),
+  email: z.string().min(6, 'Email is required').email('Please enter valid email'),
+  password: z.string().min(6, 'Email is required')
+})
+
 export type LoginFormData = z.infer<typeof loginSchema>;
+export type SignUpFormData = z.infer<typeof SignUpSchema>;

@@ -1,6 +1,7 @@
 
-import React from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SignUpFormData, SignUpSchema } from "../schemas/authSchema"
 
 export const SignUp = () => {
 
@@ -8,9 +9,11 @@ export const SignUp = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm();
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(SignUpSchema)
+  });
 
-  const handleFormSubmit = (data) => {
+  const handleFormSubmit = (data: SignUpFormData) => {
     console.log(data);
   };
 
@@ -28,9 +31,7 @@ export const SignUp = () => {
             id="name"
             type="text"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            {...register("name", {
-              required: "Name is required"
-            })}
+            {...register("name")}
           />
 
           {errors.name && (
@@ -47,9 +48,7 @@ export const SignUp = () => {
             id="email"
             type="email"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            {...register("email", {
-              required: "Email is required"
-            })}
+            {...register("email")}
           />
 
           {errors.email && (
@@ -67,9 +66,7 @@ export const SignUp = () => {
             id="password"
             type="password"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            {...register("password", {
-              required: "Password is required"
-            })}
+            {...register("password")}
           />
 
           {errors.password && (
