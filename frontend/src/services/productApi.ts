@@ -22,13 +22,15 @@ export interface BackendProduct {
   updatedAt?: string;
 }
 
+const BaseUrl = 'http://localhost:5000/api/products';
+
 export const getProducts = async (): Promise<BackendProduct[]> => {
-  const res = await axios.get('/api/products/get-products');
+  const res = await axios.get(`${BaseUrl}/get-products`);
   return res.data.data || [];
 };
 
 export const getSingleProduct = async (id: string): Promise<BackendProduct> => {
-  const res = await axios.get(`/api/products/get-single-product/${id}`);
+  const res = await axios.get(`${BaseUrl}/get-single-product/${id}`);
   return res.data.data;
 };
 
