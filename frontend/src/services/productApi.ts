@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useQuery } from "@tanstack/react-query";
 
 export interface ProductInput {
   name: string;
@@ -13,6 +14,7 @@ export interface ProductInput {
 export interface BackendProduct {
   _id: string;
   name: string;
+  slug: string;
   description: string;
   price: number;
   category: string;
@@ -22,12 +24,20 @@ export interface BackendProduct {
   updatedAt?: string;
 }
 
-const BaseUrl = 'http://localhost:5000/api/products';
+const BaseUrl = 'http://localhost:8000/api/products';
 
 export const getProducts = async (): Promise<BackendProduct[]> => {
   const res = await axios.get(`${BaseUrl}/get-products`);
   return res.data.data || [];
 };
+
+export const useProducts = () => {
+  return useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
+};
+
 
 export const getSingleProduct = async (id: string): Promise<BackendProduct> => {
   const res = await axios.get(`${BaseUrl}/get-single-product/${id}`);

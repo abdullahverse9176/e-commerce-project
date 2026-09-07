@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Products from '../components/HomeComponents/Products';
 import {
@@ -11,8 +11,14 @@ import {
   Headphones,
   Tag,
 } from 'lucide-react';
+import { useProducts } from '../services/productApi';
 
-export const HomePage: React.FC = () => {
+export const HomePage = () => {
+
+  const { data = [], isLoading, isError } = useProducts();
+
+  console.log('Products Data:', data);
+
   return (
     <div className="space-y-12 pb-16">
       {/* Hero Section */}
@@ -116,7 +122,7 @@ export const HomePage: React.FC = () => {
       {/* Main Products Listing Section */}
       <section id="products-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-800 pb-6">
-          <div>
+          <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider mb-1">
               <Tag className="w-4 h-4" /> Live Catalog
             </div>
@@ -129,7 +135,7 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
 
-        <Products />
+        <Products data={data} />
       </section>
     </div>
   );

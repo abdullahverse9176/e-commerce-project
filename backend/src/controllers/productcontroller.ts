@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
+import slugify from 'slugify';
 
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -11,6 +12,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     const product = new Product({
       name,
       price: Number(price),
+      slug:slugify(name, { lower: true, strict: true }),
       description,
       category,
       stock: Number(stock || 0),
@@ -26,8 +28,22 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const products = await Product.find();
-    res.status(200).json({ success: true, data: products });
+    const products = await Product.aggregate([
+
+      {
+        $addFields: {
+          documentedPrice: {
+            $multiply: ["$price", "$stock"]
+          }
+        }
+      }
+
+    ])
+    res.status(200).json({
+      success: true,
+      totalProducts: products.length,
+      data: products
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: (error as Error).message });
   }
@@ -71,7 +87,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 
     const updateData = {
       name, price, description, category, stock, imgUrl
-    } 
+    }
 
     const id = req.params.id;
 
