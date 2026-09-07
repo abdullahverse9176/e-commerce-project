@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Loader2, Sparkles, ShieldCheck, ShoppingBag, Truck } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Sparkles, ShieldCheck, ShoppingBag, Truck, Loader2, ArrowRight } from 'lucide-react';
 import { loginApi } from '../services/api';
 import { loginSchema, LoginFormData } from '../schemas/authSchema';
+import { useMutation } from '@tanstack/react-query';
+import { AuthResponse } from '../types/auth';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // Redirect destination (if user came from a protected route or default to '/')
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
-
-  // React Hook Form initialization with Zod resolver
   const {
     register,
     handleSubmit,
@@ -31,22 +27,24 @@ export const LoginPage: React.FC = () => {
     },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    setServerError(null);
-    setLoading(true);
-
-    try {
-      const response = await loginApi(data.email, data.password);
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-      }
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      setServerError(err.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
+  const loginMutation = useMutation({
+    mutationFn: (data: LoginFormData) => {
+      return loginApi(data.email, data.password);
+    },
+    onSuccess: (data: AuthResponse) => {
+      navigate('/');
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error('Login failed. Please check your credentials and try again.');
     }
+  });
+  
+  const handleFormSubmit = async (data: LoginFormData) => {
+
+    loginMutation.mutate(data);
+    
   };
 
   return (
@@ -109,7 +107,7 @@ export const LoginPage: React.FC = () => {
             </div>
 
             {/* Server Error Message */}
-            {serverError && (
+            {/* {serverError && (
               <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-3 text-rose-400 text-xs animate-shake">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <div className="flex-1">
@@ -117,10 +115,10 @@ export const LoginPage: React.FC = () => {
                   <span>{serverError}</span>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Login Form using React Hook Form & Zod */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5" noValidate>
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
                   Email Address
@@ -194,10 +192,10 @@ export const LoginPage: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={loading}
+                // disabled={loading}
                 className="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
               >
-                {loading ? (
+                {loginMutation.isPending ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin text-white" />
                     <span>Signing in...</span>

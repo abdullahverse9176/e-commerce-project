@@ -1,4 +1,4 @@
-import { AuthResponse, LoginInterfce, SignUpInterfce } from '../types/auth';
+import { AuthResponse, SignUpInterfce } from '../types/auth';
 import { useMutation } from '@tanstack/react-query';
 
 const API_BASE = '/api';
@@ -14,6 +14,7 @@ export const loginApi = async (email: string, password: string): Promise<AuthRes
   if (!res.ok) {
     throw new Error(data.message || 'Login failed. Please check your credentials.');
   }
+
   return data;
 };
 
@@ -45,11 +46,6 @@ export const fetchProductsApi = async () => {
   return data;
 };
 
-export const useLoginMutation = () =>
-  useMutation({
-    mutationFn: ({ email, password }: LoginInterfce) =>
-      loginApi(email, password),
-  });
 
 export const useRegisterMutation = () =>
   useMutation({

@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key';
 
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     // Validate required fields
     if (!name || !email || !password) {
@@ -30,7 +30,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
-      role: role || 'user',
+      // role: role || 'user',
     });
 
     // Response (excluding password)
@@ -95,6 +95,8 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     console.error('Login Error:', error);
-    res.status(500).json({ message: 'Server error during login', error: error.message });
+    res.status(500).json({ 
+      message: 'Server error during login', 
+      error: error.message });
   }
 };
