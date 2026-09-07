@@ -4,13 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck, ShoppingBag, Sparkles, Truck, UserRound } from 'lucide-react';
-import { useRegisterMutation } from '../services/api';
 import { SignUpFormData, SignUpSchema } from "../schemas/authSchema";
+import { useMutation } from '@tanstack/react-query';
+import { registerApi } from '../services/api';
+import { AuthResponse } from '../types/auth';
+import { toast } from 'react-hot-toast/headless';
 
 export const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const registerMutation = useRegisterMutation();
 
   const {
     register,
@@ -20,17 +22,22 @@ export const SignUp = () => {
     resolver: zodResolver(SignUpSchema)
   });
 
-  const handleFormSubmit = async (data: SignUpFormData) => {
-    try {
-      const response = await registerMutation.mutateAsync(data);
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-      }
-      navigate('/', { replace: true });
-    } catch {
-      return;
+  const registerMutation = useMutation({
+    mutationFn: (userData: SignUpFormData) => {
+      return registerApi(userData.name, userData.email, userData.password);
+    },
+    onSuccess: (data: AuthResponse) => {
+      toast.success(data.message);
+      navigate('/login', { replace: true });
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error('Sign up failed. Please check your information and try again.');
     }
+  });
+
+  const handleFormSubmit = async (data: SignUpFormData) => {
+    await registerMutation.mutate(data);
   };
 
   return (

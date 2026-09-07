@@ -32,7 +32,7 @@ export const LoginPage: React.FC = () => {
       return loginApi(data.email, data.password);
     },
     onSuccess: (data: AuthResponse) => {
-      navigate('/');
+      navigate('/', { replace: true });
       toast.success(data.message);
     },
     onError: (error) => {
