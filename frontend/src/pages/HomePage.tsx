@@ -134,8 +134,9 @@ export const HomePage = () => {
             </p>
           </div>
         </div>
-
-        <Products data={data} />
+        {isLoading && <p className="text-slate-400">Loading products...</p>}
+        {isError && <p className="text-rose-400">Failed to load products. Please refresh.</p>}
+        {!isLoading && !isError && <Products data={data} />}
       </section>
     </div>
   );
