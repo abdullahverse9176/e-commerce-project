@@ -121,6 +121,9 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     }
     res.status(200).json({ success: true, data: product });
   } catch (error) {
-    res.status(500).json({ success: false, message: (error as Error).message });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to update product'
+     });
   }
 };
