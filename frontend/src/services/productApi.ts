@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ProductInput } from '../types/ecommerce';
-
+export type { ProductInput };
 
 export interface BackendProduct {
   _id: string;
@@ -30,7 +30,6 @@ export const useProducts = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
-
 
 export const getSingleProduct = async (slug: string): Promise<BackendProduct> => {
   const res = await axios.get(`${BaseUrl}/get-single-product/${slug}`);
@@ -68,19 +67,7 @@ export const createProduct = async (data: ProductInput): Promise<BackendProduct>
   return res.data.data;
 };
 
-export const useCreateProduct = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: ProductInput) => createProduct(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-    },
-  });
-};
-
 export const updateProduct = async ({ id, data }: { id: string; data: Partial<ProductInput> }): Promise<BackendProduct> => {
-  
   const formData = new FormData();
   if (data.name !== undefined) formData.append('name', data.name);
   if (data.description !== undefined) formData.append('description', data.description);
@@ -94,7 +81,7 @@ export const updateProduct = async ({ id, data }: { id: string; data: Partial<Pr
     formData.append('imageUrl', data.imageUrl);
   }
 
-  const res = await axios.patch(`/api/products/update-product/${id}`, formData, {
+  const res = await axios.patch(`${BaseUrl}/update-product/${id}`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -103,5 +90,5 @@ export const updateProduct = async ({ id, data }: { id: string; data: Partial<Pr
 };
 
 export const deleteProduct = async (id: string): Promise<void> => {
-  await axios.delete(`/api/products/delete-product/${id}`);
+  await axios.delete(`${BaseUrl}/delete-product/${id}`);
 };

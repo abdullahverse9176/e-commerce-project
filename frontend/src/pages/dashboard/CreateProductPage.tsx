@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'react-hot-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   PackagePlus,
@@ -14,15 +15,15 @@ import {
   Tag,
   Loader2,
 } from 'lucide-react';
-import { useCreateProduct } from '../../services/productApi';
+import { createProduct } from '../../services/productApi';
 import { useCategories } from '../../context/CategoryContext';
 import { productSchema, ProductFormData } from '../../schemas/productSchema';
 import { ProductInput } from '../../types/ecommerce';
 
 export const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { categories } = useCategories();
-  const createMutation = useCreateProduct();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string>('');
@@ -44,6 +45,24 @@ export const CreateProductPage: React.FC = () => {
     },
   });
 
+  // React Query useMutation matching LoginPage style
+  const createProductMutation = useMutation({
+    mutationFn: (payload: ProductInput) => {
+      return createProduct(payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Product created successfully!');
+      navigate('/dashboard/products');
+    },
+    onError: (error: any) => {
+      console.log(error);
+      const message =
+        error.response?.data?.message || error.message || 'Failed to create product.';
+      toast.error(message);
+    },
+  });
+
   // Watch fields for live card preview
   const watchedValues = watch();
   const previewImage = filePreviewUrl || watchedValues.imageUrl || '';
@@ -56,31 +75,19 @@ export const CreateProductPage: React.FC = () => {
     }
   };
 
-  const productformSubmission = (formData: ProductFormData) => {
+  const handleFormSubmit = async (data: ProductFormData) => {
     const payload: ProductInput = {
-      name: formData.name,
-      category: formData.category || 'General',
-      price: Number(formData.price),
-      stock: Number(formData.stock || 0),
-      description: formData.description,
+      name: data.name,
+      category: data.category || 'General',
+      price: Number(data.price),
+      stock: Number(data.stock || 0),
+      description: data.description,
       image: imageFile,
-      imageUrl: formData.imageUrl?.trim() || '',
+      imageUrl: data.imageUrl?.trim() || '',
     };
 
-    createMutation.mutate(payload, {
-      onSuccess: () => {
-        toast.success('Product created successfully!');
-        navigate('/dashboard/products');
-      },
-      onError: (err: any) => {
-        const message =
-          err.response?.data?.message || err.message || 'Failed to create product.';
-        toast.error(message);
-      },
-    });
+    createProductMutation.mutate(payload);
   };
-
-  const isSubmitting = createMutation.isPending;
 
   return (
     <main className="space-y-6">
@@ -117,18 +124,18 @@ export const CreateProductPage: React.FC = () => {
             </div>
           </header>
 
-          {createMutation.isError && (
+          {createProductMutation.isError && (
             <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-3 text-rose-300 text-sm">
               <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
               <span>
-                {(createMutation.error as any)?.response?.data?.message ||
-                  (createMutation.error as Error)?.message ||
+                {(createProductMutation.error as any)?.response?.data?.message ||
+                  (createProductMutation.error as Error)?.message ||
                   'Failed to create product.'}
               </span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit(productformSubmission)} className="space-y-5" noValidate>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Product Title */}
               <div className="md:col-span-2">
@@ -326,7 +333,7 @@ export const CreateProductPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/products')}
-                disabled={isSubmitting}
+                disabled={createProductMutation.isPending}
                 className="px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm font-semibold transition-colors disabled:opacity-50"
               >
                 Cancel
@@ -334,10 +341,10 @@ export const CreateProductPage: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={createProductMutation.isPending}
                 className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
               >
-                {isSubmitting ? (
+                {createProductMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Creating Product...</span>
