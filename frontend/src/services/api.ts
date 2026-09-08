@@ -32,11 +32,3 @@ export const registerApi = async (
   }
   return res.data;
 };
-
-export const fetchProductsApi = async () => {
-  const res = await axios.get(`${API_BASE}/products/get-products`);
-  if (!res.data) {
-    throw new Error(res.data.message || 'Failed to fetch products');
-  }
-  return res.data;
-};
