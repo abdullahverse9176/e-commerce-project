@@ -7,7 +7,7 @@ const router = Router();
 // Product CRUD routes
 router.post('/create-product', uploadSingleImage('image'), createProduct);
 router.get('/get-products', getProducts);
-router.get('/get-single-product/:id', getSingleProduct);
+router.get('/get-single-product/:slug', getSingleProduct);
 router.delete('/delete-product/:id', deleteProduct);
 router.patch('/update-product/:id', uploadSingleImage('image'), updateProduct);
 

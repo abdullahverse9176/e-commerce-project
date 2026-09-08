@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Product from '../models/Product';
 import slugify from 'slugify';
 
@@ -51,7 +52,10 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 
 export const getSingleProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const product = await Product.findById(req.params.id);
+    const { slug } = req.params;
+
+    const product = await Product.findOne({slug});
+
     if (!product) {
       res.status(404).json({ success: false, message: 'Product not found' });
       return;

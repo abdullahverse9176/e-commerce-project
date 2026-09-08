@@ -3,7 +3,7 @@ import { BackendProduct } from '../../services/productApi';
 
 const Products = ({ data }: { data: BackendProduct[] }) => {
 
-
+    console.log('Products Component Data:', data);
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,7 +23,7 @@ const Products = ({ data }: { data: BackendProduct[] }) => {
                                     </Link>
                                 </h3>
                                 <p className="text-sm text-slate-400">{product.description}</p>
-                                <p className="text-sm font-bold text-indigo-400">${product.price}</p>
+                                <p className="text-sm font-bold text-indigo-400">${product.price.toFixed(2)}</p>
                             </div>
                         </div>
                     )
