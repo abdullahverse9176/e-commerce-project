@@ -12,7 +12,7 @@ const Products = ({ data }: { data: BackendProduct[] }) => {
                     return (
                         <div className="w-full md:w-3/4 lg:w-1/3" key={product._id}>
                             <div className='w-full rounded-lg overflow-hidden'>
-                                <Link to="/product/1" aria-label="View Product Details" title="View Product Details">
+                                <Link to={`/product/${product.slug}`} aria-label="View Product Details" title="View Product Details">
                                     <img src={product.imageUrl} alt={product.name} className="w-full h-auto" />
                                 </Link>
                             </div>
@@ -22,8 +22,8 @@ const Products = ({ data }: { data: BackendProduct[] }) => {
                                         {product.name}
                                     </Link>
                                 </h3>
-                                <p className="text-sm text-slate-400">Product Description</p>
-                                <p className="text-sm font-bold text-indigo-400">$99.99</p>
+                                <p className="text-sm text-slate-400">{product.description}</p>
+                                <p className="text-sm font-bold text-indigo-400">${product.price}</p>
                             </div>
                         </div>
                     )

@@ -11,6 +11,7 @@ import { CategoriesListPage } from './pages/dashboard/CategoriesListPage';
 import { CreateCategoryPage } from './pages/dashboard/CreateCategoryPage';
 import { EditCategoryPage } from './pages/dashboard/EditCategoryPage';
 import { SignUp } from './pages/SignUp';
+import ProductDetails from './pages/ProductDetails';
 
 export function App() {
   return (
@@ -23,6 +24,7 @@ export function App() {
               <Route index element={<HomePage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="signup" element={<SignUp />} />
+              <Route path="/product/:slug" element={<ProductDetails />} />
             </Route>
 
             {/* Dashboard Sub-routes */}

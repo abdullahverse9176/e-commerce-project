@@ -40,9 +40,18 @@ export const useProducts = () => {
 };
 
 
-export const getSingleProduct = async (id: string): Promise<BackendProduct> => {
-  const res = await axios.get(`${BaseUrl}/get-single-product/${id}`);
+export const getSingleProduct = async (slug: string): Promise<BackendProduct> => {
+  const res = await axios.get(`${BaseUrl}/get-single-product/${slug}`);
   return res.data.data;
+};
+
+export const useSingleProduct = (slug: string) => {
+  return useQuery({
+    queryKey: ["products", slug],
+    queryFn: () => getSingleProduct(slug),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!slug,
+  });
 };
 
 export const createProduct = async (data: ProductInput): Promise<BackendProduct> => {
