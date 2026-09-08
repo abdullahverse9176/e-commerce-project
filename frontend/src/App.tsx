@@ -10,6 +10,7 @@ import { CreateProductPage } from './pages/dashboard/CreateProductPage';
 import { CategoriesListPage } from './pages/dashboard/CategoriesListPage';
 import { CreateCategoryPage } from './pages/dashboard/CreateCategoryPage';
 import { EditCategoryPage } from './pages/dashboard/EditCategoryPage';
+import { EditProductPage } from './pages/dashboard/EditProductPage';
 import { SignUp } from './pages/SignUp';
 import ProductDetails from './pages/ProductDetails';
 
@@ -32,6 +33,7 @@ export function App() {
               <Route index element={<DashboardOverviewPage />} />
               <Route path="products" element={<ProductsListPage />} />
               <Route path="create-product" element={<CreateProductPage />} />
+              <Route path="edit-product/:id" element={<EditProductPage />} />
               <Route path="categories" element={<CategoriesListPage />} />
               <Route path="create-category" element={<CreateCategoryPage />} />
               <Route path="edit-category/:id" element={<EditCategoryPage />} />

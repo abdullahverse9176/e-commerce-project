@@ -54,7 +54,11 @@ export const getSingleProduct = async (req: Request, res: Response): Promise<voi
   try {
     const { slug } = req.params;
 
-    const product = await Product.findOne({slug});
+    const query = mongoose.isValidObjectId(slug)
+      ? { $or: [{ _id: slug }, { slug }] }
+      : { slug };
+
+    const product = await Product.findOne(query);
 
     if (!product) {
       res.status(404).json({ success: false, message: 'Product not found' });
@@ -82,15 +86,29 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-
     const { name, description, category } = req.body;
-    const imgUrl = req.file ? req.file.path : req.body.imgUrl;
+    const imageUrl = req.file ? req.file.path : (req.body.imageUrl || req.body.imgUrl);
 
-    const price = Number(req.body.price);
-    const stock = Number(req.body.stock);
+    const updateData: Record<string, any> = {};
 
-    const updateData = {
-      name, price, description, category, stock, imgUrl
+    if (name) {
+      updateData.name = name;
+      updateData.slug = slugify(name, { lower: true, strict: true });
+    }
+    if (description !== undefined) {
+      updateData.description = description;
+    }
+    if (category !== undefined) {
+      updateData.category = category;
+    }
+    if (req.body.price !== undefined && req.body.price !== '') {
+      updateData.price = Number(req.body.price);
+    }
+    if (req.body.stock !== undefined && req.body.stock !== '') {
+      updateData.stock = Number(req.body.stock);
+    }
+    if (imageUrl !== undefined) {
+      updateData.imageUrl = imageUrl;
     }
 
     const id = req.params.id;

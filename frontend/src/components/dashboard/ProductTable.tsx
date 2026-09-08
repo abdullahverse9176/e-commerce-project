@@ -231,7 +231,9 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
+                            type="button"
                             onClick={() => onEditProduct(product)}
+                            aria-label={`Edit ${product.name}`}
                             title="Edit Product"
                             className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-xl transition-all"
                           >
@@ -239,7 +241,9 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                           </button>
 
                           <button
+                            type="button"
                             onClick={() => setConfirmDeleteId(product._id)}
+                            aria-label={`Delete ${product.name}`}
                             title="Delete Product"
                             className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-xl transition-all"
                           >
