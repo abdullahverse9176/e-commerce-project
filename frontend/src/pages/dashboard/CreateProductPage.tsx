@@ -14,9 +14,10 @@ import {
   Tag,
   Loader2,
 } from 'lucide-react';
-import { useCreateProduct, ProductInput } from '../../services/productApi';
+import { useCreateProduct } from '../../services/productApi';
 import { useCategories } from '../../context/CategoryContext';
 import { productSchema, ProductFormData } from '../../schemas/productSchema';
+import { ProductInput } from '../../types/ecommerce';
 
 export const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export const CreateProductPage: React.FC = () => {
     }
   };
 
-  const onSubmit = (formData: ProductFormData) => {
+  const productformSubmission = (formData: ProductFormData) => {
     const payload: ProductInput = {
       name: formData.name,
       category: formData.category || 'General',
@@ -127,7 +128,7 @@ export const CreateProductPage: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+          <form onSubmit={handleSubmit(productformSubmission)} className="space-y-5" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Product Title */}
               <div className="md:col-span-2">

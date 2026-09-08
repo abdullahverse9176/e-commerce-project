@@ -1,15 +1,7 @@
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ProductInput } from '../types/ecommerce';
 
-export interface ProductInput {
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  stock: number;
-  image?: File | null;
-  imageUrl?: string;
-}
 
 export interface BackendProduct {
   _id: string;

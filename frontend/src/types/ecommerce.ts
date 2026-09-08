@@ -39,3 +39,13 @@ export interface FlashDeal {
   soldCount: number;
   totalStock: number;
 }
+
+export interface ProductInput {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  image?: File | null;
+  imageUrl?: string;
+}
