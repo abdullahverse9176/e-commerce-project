@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface ProductInput {
   name: string;
@@ -49,7 +49,7 @@ export const useSingleProduct = (slug: string) => {
   return useQuery({
     queryKey: ["products", slug],
     queryFn: () => getSingleProduct(slug),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
     enabled: !!slug,
   });
 };
@@ -68,7 +68,7 @@ export const createProduct = async (data: ProductInput): Promise<BackendProduct>
     formData.append('imageUrl', data.imageUrl);
   }
 
-  const res = await axios.post('/api/products/create-product', formData, {
+  const res = await axios.post(`${BaseUrl}/create-product`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -76,7 +76,19 @@ export const createProduct = async (data: ProductInput): Promise<BackendProduct>
   return res.data.data;
 };
 
+export const useCreateProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: ProductInput) => createProduct(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+};
+
 export const updateProduct = async ({ id, data }: { id: string; data: Partial<ProductInput> }): Promise<BackendProduct> => {
+  
   const formData = new FormData();
   if (data.name !== undefined) formData.append('name', data.name);
   if (data.description !== undefined) formData.append('description', data.description);

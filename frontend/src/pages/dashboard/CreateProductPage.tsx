@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'react-hot-toast';
 import {
   ArrowLeft,
   PackagePlus,
@@ -10,81 +12,79 @@ import {
   Package,
   DollarSign,
   Tag,
-  Loader2
+  Loader2,
 } from 'lucide-react';
-import { createProduct, ProductInput } from '../../services/productApi';
+import { useCreateProduct, ProductInput } from '../../services/productApi';
 import { useCategories } from '../../context/CategoryContext';
+import { productSchema, ProductFormData } from '../../schemas/productSchema';
 
 export const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { categories } = useCategories();
+  const createMutation = useCreateProduct();
 
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState(categories[0]?.name || 'Electronics');
-  const [price, setPrice] = useState<number | ''>('');
-  const [stock, setStock] = useState<number | ''>('');
-  const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string>('');
 
-  const createMutation = useMutation({
-    mutationFn: (newProduct: ProductInput) => createProduct(newProduct),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      navigate('/dashboard/products');
-    },
-    onError: (err: any) => {
-      setErrorMsg(err.response?.data?.message || err.message || 'Failed to create product.');
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: '',
+      category: categories[0]?.name || 'General',
+      price: undefined,
+      stock: 0,
+      description: '',
+      imageUrl: '',
     },
   });
+
+  // Watch fields for live card preview
+  const watchedValues = watch();
+  const previewImage = filePreviewUrl || watchedValues.imageUrl || '';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setImageFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
+      setFilePreviewUrl(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
-
-    if (!name.trim()) {
-      setErrorMsg('Product name is required.');
-      return;
-    }
-    if (price === '' || Number(price) < 0) {
-      setErrorMsg('Valid product price is required.');
-      return;
-    }
-    if (!description.trim()) {
-      setErrorMsg('Product description is required.');
-      return;
-    }
-
+  const onSubmit = (formData: ProductFormData) => {
     const payload: ProductInput = {
-      name: name.trim(),
-      category: category.trim() || 'General',
-      price: Number(price),
-      stock: stock === '' ? 0 : Number(stock),
-      description: description.trim(),
+      name: formData.name,
+      category: formData.category || 'General',
+      price: Number(formData.price),
+      stock: Number(formData.stock || 0),
+      description: formData.description,
       image: imageFile,
-      imageUrl: imageUrl.trim(),
+      imageUrl: formData.imageUrl?.trim() || '',
     };
 
-    createMutation.mutate(payload);
+    createMutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success('Product created successfully!');
+        navigate('/dashboard/products');
+      },
+      onError: (err: any) => {
+        const message =
+          err.response?.data?.message || err.message || 'Failed to create product.';
+        toast.error(message);
+      },
+    });
   };
 
-  const isLoading = createMutation.isPending;
+  const isSubmitting = createMutation.isPending;
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
       {/* Top Breadcrumbs & Back Navigation */}
-      <div className="flex items-center justify-between">
+      <nav aria-label="Dashboard Breadcrumb" className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             to="/dashboard/products"
@@ -98,32 +98,36 @@ export const CreateProductPage: React.FC = () => {
           <span className="text-slate-600 text-xs">/</span>
           <span className="text-xs text-indigo-400 font-semibold">Create New Product</span>
         </div>
-      </div>
+      </nav>
 
       {/* Main Grid: Form & Live Preview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left 2 Cols: Form */}
         <section aria-label="Product Creation Form" className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
-          <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
+          <header className="flex items-center gap-3 pb-4 border-b border-slate-800">
             <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-inner">
               <PackagePlus className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">Product Information</h2>
+              <h1 className="text-lg font-bold text-white tracking-tight">Product Information</h1>
               <p className="text-xs text-slate-400 mt-0.5">
                 Set product title, pricing, stock count, and upload media
               </p>
             </div>
-          </div>
+          </header>
 
-          {errorMsg && (
+          {createMutation.isError && (
             <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-3 text-rose-300 text-sm">
               <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
-              <span>{errorMsg}</span>
+              <span>
+                {(createMutation.error as any)?.response?.data?.message ||
+                  (createMutation.error as Error)?.message ||
+                  'Failed to create product.'}
+              </span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Product Title */}
               <div className="md:col-span-2">
@@ -136,12 +140,20 @@ export const CreateProductPage: React.FC = () => {
                 <input
                   id="create-prod-name"
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  {...register('name')}
                   placeholder="e.g. Wireless Active Noise-Canceling Headphones"
-                  required
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 outline-none transition-all"
+                  className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 outline-none transition-all ${
+                    errors.name
+                      ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                  }`}
                 />
+                {errors.name && (
+                  <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{errors.name.message}</span>
+                  </p>
+                )}
               </div>
 
               {/* Category Dropdown */}
@@ -154,8 +166,7 @@ export const CreateProductPage: React.FC = () => {
                 </label>
                 <select
                   id="create-prod-cat"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  {...register('category')}
                   className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all cursor-pointer"
                 >
                   {categories.map((cat) => (
@@ -165,6 +176,12 @@ export const CreateProductPage: React.FC = () => {
                   ))}
                   <option value="General">General</option>
                 </select>
+                {errors.category && (
+                  <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{errors.category.message}</span>
+                  </p>
+                )}
               </div>
 
               {/* Price */}
@@ -180,12 +197,20 @@ export const CreateProductPage: React.FC = () => {
                   type="number"
                   step="0.01"
                   min="0"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value ? Number(e.target.value) : '')}
+                  {...register('price', { valueAsNumber: true })}
                   placeholder="149.99"
-                  required
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 outline-none transition-all"
+                  className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 outline-none transition-all ${
+                    errors.price
+                      ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                  }`}
                 />
+                {errors.price && (
+                  <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{errors.price.message}</span>
+                  </p>
+                )}
               </div>
 
               {/* Stock */}
@@ -200,11 +225,20 @@ export const CreateProductPage: React.FC = () => {
                   id="create-prod-stock"
                   type="number"
                   min="0"
-                  value={stock}
-                  onChange={(e) => setStock(e.target.value ? Number(e.target.value) : '')}
+                  {...register('stock', { valueAsNumber: true })}
                   placeholder="30"
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 outline-none transition-all"
+                  className={`w-full bg-slate-950 border rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 outline-none transition-all ${
+                    errors.stock
+                      ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                  }`}
                 />
+                {errors.stock && (
+                  <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{errors.stock.message}</span>
+                  </p>
+                )}
               </div>
 
               {/* Image Web URL */}
@@ -218,11 +252,7 @@ export const CreateProductPage: React.FC = () => {
                 <input
                   id="create-prod-url"
                   type="url"
-                  value={imageUrl}
-                  onChange={(e) => {
-                    setImageUrl(e.target.value);
-                    if (!imageFile) setPreviewUrl(e.target.value);
-                  }}
+                  {...register('imageUrl')}
                   placeholder="https://images.unsplash.com/..."
                   className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 outline-none transition-all"
                 />
@@ -247,13 +277,15 @@ export const CreateProductPage: React.FC = () => {
                     />
                   </label>
 
-                  {previewUrl && (
+                  {previewImage && (
                     <div className="relative w-16 h-16 rounded-2xl border border-indigo-500/30 bg-slate-950 overflow-hidden shrink-0 shadow-md">
                       <img
-                        src={previewUrl}
-                        alt={name ? `${name} product preview` : 'Product preview'}
+                        src={previewImage}
+                        alt="Product preview thumbnail"
                         className="w-full h-full object-cover"
-                        onError={() => setPreviewUrl('')}
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
                       />
                     </div>
                   )}
@@ -271,12 +303,20 @@ export const CreateProductPage: React.FC = () => {
                 <textarea
                   id="create-prod-desc"
                   rows={4}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  {...register('description')}
                   placeholder="Enter detailed description, key specifications, and features..."
-                  required
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl p-3 text-white text-sm placeholder-slate-500 outline-none transition-all resize-none"
+                  className={`w-full bg-slate-950 border rounded-xl p-3 text-white text-sm placeholder-slate-500 outline-none transition-all resize-none ${
+                    errors.description
+                      ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                  }`}
                 />
+                {errors.description && (
+                  <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{errors.description.message}</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -285,18 +325,18 @@ export const CreateProductPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/products')}
-                disabled={isLoading}
-                className="px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm font-semibold transition-colors"
+                disabled={isSubmitting}
+                className="px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm font-semibold transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Creating Product...</span>
@@ -315,19 +355,21 @@ export const CreateProductPage: React.FC = () => {
         {/* Right 1 Col: Live Storefront Card Preview */}
         <aside aria-label="Product Card Preview" className="space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-indigo-400" />
               <span>Store Card Preview</span>
-            </h3>
+            </h2>
 
             <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 overflow-hidden space-y-3">
               <div className="w-full h-40 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center relative">
-                {previewUrl ? (
+                {previewImage ? (
                   <img
-                    src={previewUrl}
-                    alt={name ? `${name} card preview` : 'Product card preview'}
+                    src={previewImage}
+                    alt={watchedValues.name ? `${watchedValues.name} card preview` : 'Product card preview'}
                     className="w-full h-full object-cover"
-                    onError={() => setPreviewUrl('')}
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
                   />
                 ) : (
                   <div className="flex flex-col items-center gap-2 text-slate-600">
@@ -340,22 +382,22 @@ export const CreateProductPage: React.FC = () => {
               <div>
                 <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
                   <Tag className="w-2.5 h-2.5" />
-                  {category || 'General'}
+                  {watchedValues.category || 'General'}
                 </span>
-                <h4 className="text-sm font-bold text-white mt-1.5 line-clamp-1">
-                  {name || 'Product Title'}
-                </h4>
+                <h3 className="text-sm font-bold text-white mt-1.5 line-clamp-1">
+                  {watchedValues.name || 'Product Title'}
+                </h3>
                 <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">
-                  {description || 'Product description will appear here on the storefront product listing.'}
+                  {watchedValues.description || 'Product description will appear here on the storefront product listing.'}
                 </p>
 
                 <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-800/80">
                   <span className="text-base font-black text-emerald-400 flex items-center">
                     <DollarSign className="w-4 h-4 mr-0.5" />
-                    {price ? Number(price).toFixed(2) : '0.00'}
+                    {watchedValues.price ? Number(watchedValues.price).toFixed(2) : '0.00'}
                   </span>
                   <span className="text-xs font-semibold text-slate-400">
-                    Stock: {stock !== '' ? stock : 0}
+                    Stock: {watchedValues.stock !== undefined ? watchedValues.stock : 0}
                   </span>
                 </div>
               </div>
@@ -363,6 +405,6 @@ export const CreateProductPage: React.FC = () => {
           </div>
         </aside>
       </div>
-    </div>
+    </main>
   );
 };
